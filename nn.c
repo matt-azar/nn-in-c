@@ -78,9 +78,9 @@ void softmax(double *output, int size) {
 // Forward pass through the network
 void forward_pass(Network *net, double *input, double dropout_rate, int is_training) {
     // First hidden layer
-    for (int i = 0; i < net->hidden_size1; ++i) {
+    for (size_t i = 0; i < net->hidden_size1; ++i) {
         net->hidden1[i] = net->biases1[i];
-        for (int j = 0; j < net->input_size; ++j) {
+        for (size_t j = 0; j < net->input_size; ++j) {
             net->hidden1[i] += input[j] * net->weights1[i * net->input_size + j];
         }
         net->hidden1[i] = relu(net->hidden1[i]);
@@ -90,9 +90,9 @@ void forward_pass(Network *net, double *input, double dropout_rate, int is_train
     }
 
     // Second hidden layer
-    for (int i = 0; i < net->hidden_size2; ++i) {
+    for (size_t i = 0; i < net->hidden_size2; ++i) {
         net->hidden2[i] = net->biases2[i];
-        for (int j = 0; j < net->hidden_size1; ++j) {
+        for (size_t j = 0; j < net->hidden_size1; ++j) {
             net->hidden2[i] += net->hidden1[j] * net->weights2[i * net->hidden_size1 + j];
         }
         net->hidden2[i] = relu(net->hidden2[i]);
@@ -102,9 +102,9 @@ void forward_pass(Network *net, double *input, double dropout_rate, int is_train
     }
 
     // Output layer
-    for (int i = 0; i < net->output_size; ++i) {
+    for (size_t i = 0; i < net->output_size; ++i) {
         net->output[i] = net->biases3[i];
-        for (int j = 0; j < net->hidden_size2; ++j) {
+        for (size_t j = 0; j < net->hidden_size2; ++j) {
             net->output[i] += net->hidden2[j] * net->weights3[i * net->hidden_size2 + j];
         }
     }
@@ -115,7 +115,7 @@ void forward_pass(Network *net, double *input, double dropout_rate, int is_train
 // Backpropagation to update weights and biases
 void backpropagate(Network *net, double *input, unsigned char target_label, double learning_rate) {
     double target[net->output_size];
-    for (int i = 0; i < net->output_size; ++i)
+    for (size_t i = 0; i < net->output_size; ++i)
         target[i] = 0.0;
     target[target_label] = 1.0;
 
@@ -124,16 +124,16 @@ void backpropagate(Network *net, double *input, unsigned char target_label, doub
     double hidden1_error[net->hidden_size1], hidden1_delta[net->hidden_size1];
 
     // Output layer errors and deltas
-    for (int i = 0; i < net->output_size; ++i) {
+    for (size_t i = 0; i < net->output_size; ++i) {
         output_error[i] = target[i] - net->output[i];
         output_delta[i] = output_error[i];
         net->biases3[i] += learning_rate * output_delta[i];
     }
 
     // Hidden layer 2 errors and deltas
-    for (int i = 0; i < net->hidden_size2; ++i) {
+    for (size_t i = 0; i < net->hidden_size2; ++i) {
         hidden2_error[i] = 0.0;
-        for (int j = 0; j < net->output_size; ++j) {
+        for (size_t j = 0; j < net->output_size; ++j) {
             hidden2_error[i] += output_delta[j] * net->weights3[j * net->hidden_size2 + i];
         }
         hidden2_delta[i] = hidden2_error[i] * relu_derivative(net->hidden2[i]);
@@ -141,9 +141,9 @@ void backpropagate(Network *net, double *input, unsigned char target_label, doub
     }
 
     // Hidden layer 1 errors and deltas
-    for (int i = 0; i < net->hidden_size1; ++i) {
+    for (size_t i = 0; i < net->hidden_size1; ++i) {
         hidden1_error[i] = 0.0;
-        for (int j = 0; j < net->hidden_size2; ++j) {
+        for (size_t j = 0; j < net->hidden_size2; ++j) {
             hidden1_error[i] += hidden2_delta[j] * net->weights2[j * net->hidden_size1 + i];
         }
         hidden1_delta[i] = hidden1_error[i] * relu_derivative(net->hidden1[i]);
@@ -151,20 +151,20 @@ void backpropagate(Network *net, double *input, unsigned char target_label, doub
     }
 
     // Update weights
-    for (int i = 0; i < net->output_size; ++i) {
-        for (int j = 0; j < net->hidden_size2; ++j) {
+    for (size_t i = 0; i < net->output_size; ++i) {
+        for (size_t j = 0; j < net->hidden_size2; ++j) {
             net->weights3[i * net->hidden_size2 + j] += learning_rate * output_delta[i] * net->hidden2[j];
         }
     }
 
-    for (int i = 0; i < net->hidden_size2; ++i) {
-        for (int j = 0; j < net->hidden_size1; ++j) {
+    for (size_t i = 0; i < net->hidden_size2; ++i) {
+        for (size_t j = 0; j < net->hidden_size1; ++j) {
             net->weights2[i * net->hidden_size1 + j] += learning_rate * hidden2_delta[i] * net->hidden1[j];
         }
     }
 
-    for (int i = 0; i < net->hidden_size1; ++i) {
-        for (int j = 0; j < net->input_size; ++j) {
+    for (size_t i = 0; i < net->hidden_size1; ++i) {
+        for (size_t j = 0; j < net->input_size; ++j) {
             net->weights1[i * net->input_size + j] += learning_rate * hidden1_delta[i] * input[j];
         }
     }
@@ -183,7 +183,7 @@ double dropout(double x, double dropout_rate) {
 // Predict the label with the highest probability
 int predict(Network *net) {
     int max_index = 0;
-    for (int i = 1; i < net->output_size; ++i) {
+    for (size_t i = 1; i < net->output_size; ++i) {
         if (net->output[i] > net->output[max_index]) {
             max_index = i;
         }
@@ -210,7 +210,6 @@ void save_network(const char *filename, Network *net) {
     printf("Network saved to %s\n", filename);
 }
 
-// Load the network from a file
 void load_network(const char *filename, Network *net) {
     FILE *file = fopen(filename, "rb");
     if (!file) {
@@ -218,13 +217,50 @@ void load_network(const char *filename, Network *net) {
         exit(EXIT_FAILURE);
     }
 
-    fread(net->weights1, sizeof(double), net->input_size * net->hidden_size1, file);
-    fread(net->weights2, sizeof(double), net->hidden_size1 * net->hidden_size2, file);
-    fread(net->weights3, sizeof(double), net->hidden_size2 * net->output_size, file);
-    fread(net->biases1, sizeof(double), net->hidden_size1, file);
-    fread(net->biases2, sizeof(double), net->hidden_size2, file);
-    fread(net->biases3, sizeof(double), net->output_size, file);
+    size_t items_read;
+
+    items_read = fread(net->weights1, sizeof(double), net->input_size * net->hidden_size1, file);
+    if (items_read != net->input_size * net->hidden_size1) {
+        fprintf(stderr, "Error: Failed to read weights1 from file.\n");
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
+
+    items_read = fread(net->weights2, sizeof(double), net->hidden_size1 * net->hidden_size2, file);
+    if (items_read != net->hidden_size1 * net->hidden_size2) {
+        fprintf(stderr, "Error: Failed to read weights2 from file.\n");
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
+
+    items_read = fread(net->weights3, sizeof(double), net->hidden_size2 * net->output_size, file);
+    if (items_read != net->hidden_size2 * net->output_size) {
+        fprintf(stderr, "Error: Failed to read weights3 from file.\n");
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
+
+    items_read = fread(net->biases1, sizeof(double), net->hidden_size1, file);
+    if (items_read != net->hidden_size1) {
+        fprintf(stderr, "Error: Failed to read biases1 from file.\n");
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
+
+    items_read = fread(net->biases2, sizeof(double), net->hidden_size2, file);
+    if (items_read != net->hidden_size2) {
+        fprintf(stderr, "Error: Failed to read biases2 from file.\n");
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
+
+    items_read = fread(net->biases3, sizeof(double), net->output_size, file);
+    if (items_read != net->output_size) {
+        fprintf(stderr, "Error: Failed to read biases3 from file.\n");
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
 
     fclose(file);
-    printf("Network loaded from %s\n", filename);
+    printf("Network loaded successfully from %s\n", filename);
 }

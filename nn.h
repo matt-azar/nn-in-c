@@ -5,16 +5,16 @@
 #include <stdlib.h>
 
 // Network parameters
-#define IMAGE_SIZE 784
-#define HIDDEN_SIZE1 12
-#define HIDDEN_SIZE2 12
-#define OUTPUT_SIZE 10
+#define IMAGE_SIZE 784  // Do not modify IMAGE_SIZE or OUTPUT_SIZE.
+#define HIDDEN_SIZE1 32 // Increase size of hidden layers for increased accuracy
+#define HIDDEN_SIZE2 64 // at the cost of increased runtime. Recommended range:
+#define OUTPUT_SIZE 10  // ~ (10, 150) for reasonable accuracy and runtime.
 
 typedef struct {
-    int input_size;
-    int hidden_size1;
-    int hidden_size2;
-    int output_size;
+    size_t input_size;
+    size_t hidden_size1;
+    size_t hidden_size2;
+    size_t output_size;
 
     double *weights1;
     double *weights2;
