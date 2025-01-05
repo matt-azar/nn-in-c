@@ -1,5 +1,7 @@
 # Run this file in your shell to compile the project.
-# Uses the zig compiler. 
+
+# Uses the zig compiler. For some reason the build.zig file compiles a much
+# slower binary than this file when both are in release mode. 
 
 instructions = """
 Usage: python3 compile.py <mode>
@@ -20,9 +22,9 @@ def main():
     mode = sys.argv[1].lower()
 
     if mode == "debug":
-        cmd1 = "zig cc -o debug_nn nn.c mnist_loader.c main.c -lc -Wall -Wextra"
+        cmd1 = "zig cc -o debug_nn src/nn.c src/mnist_loader.c src/main.c -Iinclude -lc -Wall -Wextra"
     elif mode == "release":
-        cmd1 = "zig cc -o release_nn nn.c mnist_loader.c main.c -lc -Ofast"
+        cmd1 = "zig cc -o release_nn src/nn.c src/mnist_loader.c src/main.c -Iinclude -lc -Ofast"
     else:
         print(f"Unknown mode: {mode}\n")
         print(instructions)
